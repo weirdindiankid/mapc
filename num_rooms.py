@@ -65,6 +65,20 @@ def add_bu_num_rooms_to_df(input_df):
 	except Exception as e:
 		exit("There was an error processing the numRooms column: " + str(e))
 
+def get_error_rate(input_df):
+	'''
+	Output: Scalar quantity that counts the number of rooms where BU's calculations
+			don't match MAPC's.
+	Input:  Pandas DataFrame object containing the numRooms and numRooms_BU columns.
+	'''
+	error_count = 0
+	num_rooms = input_df['numRooms']
+	num_rooms_bu = input_df['numRooms_BU']
+	for i in range(len(num_rooms)):
+		if num_rooms[i] != num_rooms_bu[i]:
+			error_count += 1
+	return error_count
+
 def get_keywords(spreadsheet):
 	'''
 	Output: A list containing all possibly keywords that are relevant to classifying 
@@ -94,6 +108,10 @@ def eval_num_rooms(spreadsheet):
 		keywords = get_keywords(spreadsheet)
 
 		df = add_bu_num_rooms_to_df(df)
+		error_count = get_error_rate(df)
+		with open('data/error_count.txt', 'w') as f:
+			f.write(str(error_count) + '\n')
+			f.close()
 		df.to_excel('data/estim.xlsx', index=False)
 		# Everything succeeded.
 		return SUCCESS
