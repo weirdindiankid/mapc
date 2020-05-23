@@ -14,6 +14,7 @@ import string
 import argparse
 import sys
 from constants import *
+import witai
 
 #
 nlp = spacy.load('en_core_web_sm')
@@ -36,29 +37,37 @@ def add_bu_num_rooms_to_df(input_df):
 		# us to estimate the number of rooms, given a row the represents
 		# rental listings. We will work on improving this algorithm 2
 		# weeks from today (7th May, 2020)
-		punctuations = string.punctuation
+		#punctuations = string.punctuation
 		# Create our list of stopwords
 		# Load English tokenizer, with stopwords
-		parser = English()
-		stop_words = spacy.lang.en.stop_words.STOP_WORDS
+		#parser = English()
+		#stop_words = spacy.lang.en.stop_words.STOP_WORDS
+		# TODO: remove stop words
+		#wordl = input_df['desc'].tokenize()
 		# FOR POS TAGGING
 		#nlp = spacy.load('en')
 
-		num_rooms_global = []; idx_matches = []; correct_rooms = []
-		num_rooms_bu = []
+		#num_rooms_global = []; idx_matches = []; correct_rooms = []
+		#num_rooms_bu = []
 
-		for x in input_df.itertuples():
-			title = (x.title); idx = x.Index
-			title = nlp(title)
-			mapc_numRooms = x.numRooms
-			# only looking at rooms_avail
-			rooms_avail = x.bedrooms
-			dep_tagged = [(word.dep_) for word in title] 
-			num_count = dep_tagged.count('nummod') + dep_tagged.count('nmod')
-			num_rooms_bu.append(num_count)
+		# for x in input_df.itertuples():
+		# 	title = (x.title); idx = x.Index
+		# 	title = nlp(title)
+		# 	mapc_numRooms = x.numRooms
+		# 	# only looking at rooms_avail
+		# 	rooms_avail = x.bedrooms
+		# 	dep_tagged = [(word.dep_) for word in title] 
+		# 	num_count = dep_tagged.count('nummod') + dep_tagged.count('nmod')
+		# 	num_rooms_bu.append(num_count)
+
+		# For each sentence, let us get witai.get_num_rooms_from_sentence(sentence)
+		num_rooms_bu = []
+		for title in input_df['title'].values:
+			num_rooms_estimate = witai.get_num_rooms_from_sentence(title)
+			num_rooms_bu.append(num_rooms_estimate)
 
 		# Pragma Mark: End NLP Stuff
-		num_rooms_mapc = list(input_df['numRooms'].values)
+		#num_rooms_mapc = list(input_df['numRooms'].values)
 		input_df.insert(5, 'numRooms_BU', num_rooms_bu)
 		#input_df['numRooms_BU'] = num_rooms_bu
 		return input_df
